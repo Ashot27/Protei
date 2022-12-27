@@ -30,3 +30,8 @@
 *.exe
 *.out
 *.app
+
+# Project folders
+build/*
+.vscode/*
+.ssh/*
