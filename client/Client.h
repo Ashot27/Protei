@@ -24,7 +24,7 @@ class Client {
            bool is_tcp = true);
     ~Client();
 
-    status prepare();
+    Client_status prepare();
     void run();
     bool is_status_ok();
     void stop();
@@ -39,5 +39,5 @@ class Client {
     struct sockaddr_in destination_addr;
     bool is_tcp;
     int c_socket;
-    status _status;
+    Client_status _status;
 };

@@ -10,11 +10,11 @@ Client::Client(const char* destination_ip, const uint16_t destination_port,
 
 Client::~Client() {}
 
-status Client::prepare() {
+Client_status Client::prepare() {
     if (is_tcp) {
         if ((c_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
             cerr << "Failed to create TCP socket: " << strerror(errno) << endl;
-            return _status = status::err_socket_init;
+            return _status = Client_status::err_socket_init;
         } else {
             cout << "The TCP socket is created" << endl;
         }
@@ -25,19 +25,19 @@ status Client::prepare() {
                  << htons(destination_addr.sin_port) << " :" << strerror(errno)
                  << endl;
             close(c_socket);
-            return _status = status::err_socket_connection;
+            return _status = Client_status::err_socket_connection;
         } else {
             cout << "The socket is connected" << endl;
         }
-        return _status = status::connected;
+        return _status = Client_status::connected;
     } else {
         if ((c_socket = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
             cerr << "Failed to create UDP socket: " << strerror(errno) << endl;
-            return _status = status::err_socket_init;
+            return _status = Client_status::err_socket_init;
         } else {
             cout << "The UDP socket is created" << endl;
         }
-        return _status = status::up;
+        return _status = Client_status::up;
     }
 }
 
@@ -51,9 +51,9 @@ void Client::run() {
 
 bool Client::is_status_ok() {
     if (is_tcp) {
-        return _status == status::connected;
+        return _status == Client_status::connected;
     }
-    return _status == status::up;
+    return _status == Client_status::up;
 }
 
 void Client::tcp_connect_hndl() {
@@ -117,7 +117,7 @@ string Client::resv_response_from_udp_server() {
 };
 
 void Client::stop() {
-    _status = status::disconnected;
+    _status = Client_status::disconnected;
     if (close(c_socket) < 0) {
         cout << "Failed to close socket: " << strerror(errno) << endl;
     }

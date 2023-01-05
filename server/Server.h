@@ -25,7 +25,7 @@ class Server {
    public:
     ~Server();
     static Server& get_instance(const char* ip, const uint32_t port);
-    status prepare();
+    Server_status prepare();
     void run();
     void stop();
     void tcp_connect_hndl();
@@ -37,7 +37,7 @@ class Server {
                                      string data);
 
    private:
-    status _status;
+    Server_status _status;
     int s_socket_tcp;
     int s_socket_udp;
     int max_fd;

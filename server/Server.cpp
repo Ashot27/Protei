@@ -8,7 +8,7 @@ Server::Server(const char* ip, const uint16_t port) {
 }
 
 Server::~Server() {
-    if (_status == status::up)
+    if (_status == Server_status::up)
         stop();
 }
 
@@ -17,11 +17,11 @@ Server& Server::get_instance(const char* ip, const uint32_t port) {
     return instance;
 }
 
-status Server::prepare() {
+Server_status Server::prepare() {
     // TCP
     if ((s_socket_tcp = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
         cerr << "Failed to create TCP socket: " << strerror(errno) << endl;
-        return _status = status::err_socket_init;
+        return _status = Server_status::err_socket_init;
     } else {
         cout << "The TCP socket is created" << endl;
     }
@@ -34,21 +34,21 @@ status Server::prepare() {
 
         cerr << "Failed to set options to TCP socket: " << strerror(errno)
              << endl;
-        return _status = status::err_socket_setopt;
+        return _status = Server_status::err_socket_setopt;
     } else {
         cout << "The TCP socket options were set" << endl;
     }
 
     if (bind(s_socket_tcp, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
         cerr << "Failed to bind TCP socket: " << strerror(errno) << endl;
-        return _status = status::err_socket_bind;
+        return _status = Server_status::err_socket_bind;
     } else {
         cout << "The TCP socket is binded" << endl;
     }
 
     if (listen(s_socket_tcp, SOMAXCONN) < 0) {  // ~ 128 (based on the system)
         cerr << "Failed to listen socket: " << strerror(errno) << endl;
-        return _status = status::err_socket_listening;
+        return _status = Server_status::err_socket_listening;
     } else {
         cout << "The socket is listening" << endl;
     }
@@ -56,7 +56,7 @@ status Server::prepare() {
     // UDP
     if ((s_socket_udp = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
         cerr << "Failed to create UDP socket: " << strerror(errno) << endl;
-        return _status = status::err_socket_init;
+        return _status = Server_status::err_socket_init;
     } else {
         cout << "The UDP socket is created" << endl;
     }
@@ -68,14 +68,14 @@ status Server::prepare() {
 
         cerr << "Failed to set options to UDP socket: " << strerror(errno)
              << endl;
-        return _status = status::err_socket_setopt;
+        return _status = Server_status::err_socket_setopt;
     } else {
         cout << "The UDP socket options were set" << endl;
     }
 
     if (bind(s_socket_udp, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
         cerr << "Failed to bind UDP socket: " << strerror(errno) << endl;
-        return _status = status::err_socket_bind;
+        return _status = Server_status::err_socket_bind;
     } else {
         cout << "The UDP socket is binded" << endl;
     }
@@ -83,12 +83,12 @@ status Server::prepare() {
     FD_ZERO(&fd_read);  // clear the descriptor
     max_fd = (s_socket_tcp > s_socket_udp ? s_socket_tcp : s_socket_udp) + 1;
 
-    return _status = status::up;
+    return _status = Server_status::up;
 }
 
 void Server::run() {
 
-    while (_status == status::up) {
+    while (_status == Server_status::up) {
 
         // set listenfd and udpfd in readset
         FD_SET(s_socket_tcp, &fd_read);
@@ -111,7 +111,7 @@ void Server::tcp_connect_hndl() {
     socklen_t addr_len = sizeof(sockaddr_in);
     int client_socket =
         accept(s_socket_tcp, (struct sockaddr*)&client_addr, &addr_len);
-    if (client_socket >= 0 && _status == status::up) {
+    if (client_socket >= 0 && _status == Server_status::up) {
         cout << "New connection!" << endl;
         auto data = resv_request_from_tcp_client(client_socket);
         send_response_to_tcp_client(client_socket, data);
@@ -171,7 +171,7 @@ void Server::send_response_to_udp_client(const struct sockaddr_in& client_addr,
 }
 
 void Server::stop() {
-    _status = status::down;
+    _status = Server_status::down;
     if (close(s_socket_tcp) < 0) {
         cout << "Failed to close TCP socket: " << strerror(errno) << endl;
     }
