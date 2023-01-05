@@ -4,10 +4,11 @@
 
 enum class status : uint8_t
 {
-    connected = 0,
+    up = 0,
     err_socket_init = 1,
     err_socket_connection = 2,
-    disconnected = 3
+    connected = 3,
+    disconnected = 4
 };
 
 inline std::ostream& operator<<(std::ostream& out, const status& _status) {
@@ -17,9 +18,10 @@ inline std::ostream& operator<<(std::ostream& out, const status& _status) {
         s = #p;        \
         break;
     switch (_status) {
-        PROCESS_VAL(status::connected);
+        PROCESS_VAL(status::up);
         PROCESS_VAL(status::err_socket_init);
         PROCESS_VAL(status::err_socket_connection);
+        PROCESS_VAL(status::connected);
         PROCESS_VAL(status::disconnected);
     }
 #undef PROCESS_VAL

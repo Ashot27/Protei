@@ -20,19 +20,24 @@ using std::string;
 
 class Client {
    public:
-    Client(const char* destination_ip, const uint16_t destination_port);
+    Client(const char* destination_ip, const uint16_t destination_port,
+           bool is_tcp = true);
     ~Client();
 
     status prepare();
     void run();
+    bool is_status_ok();
     void stop();
-    void connect_hndl();
-    void send_request_to_server(string message);
-    string resv_response_from_server();
+    void tcp_connect_hndl();
+    void send_request_to_tcp_server(string message);
+    string resv_response_from_tcp_server();
+    void udp_connect_hndl();
+    void send_request_to_udp_server(string message);
+    string resv_response_from_udp_server();
 
    private:
-    const char* destination_ip;
-    uint16_t destination_port;
+    struct sockaddr_in destination_addr;
+    bool is_tcp;
     int c_socket;
     status _status;
 };

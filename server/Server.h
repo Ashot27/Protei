@@ -28,9 +28,13 @@ class Server {
     status prepare();
     void run();
     void stop();
-    void connect_hndl(const int client_socket);
-    string resv_request_from_client(const int client_socket);
-    void send_response_to_client(const int client_socket, string data);
+    void tcp_connect_hndl();
+    string resv_request_from_tcp_client(const int client_socket);
+    void send_response_to_tcp_client(const int client_socket, string data);
+    void udp_connect_hndl();
+    string resv_request_from_udp_client(const struct sockaddr_in& client_addr);
+    void send_response_to_udp_client(const struct sockaddr_in& client_addr,
+                                     string data);
 
    private:
     status _status;
