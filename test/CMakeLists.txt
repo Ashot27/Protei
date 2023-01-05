@@ -4,11 +4,16 @@ set(CMAKE_CXX_STANDARD 11)
 project(test)
 
 set(HEADER_FILES 
-    "String_parser.h"
+    "../String_parser.h"
+    "../server/Server.h"
+    "../client/Client.h"
 )
 add_executable (Test 
     "main.cpp" 
     "String_parser_test.cpp"
+    "Connection_test.cpp"
+    "../server/Server.cpp"
+    "../client/Client.cpp"
 )
 
 
