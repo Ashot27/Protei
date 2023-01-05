@@ -8,7 +8,9 @@ Client::Client(const char* destination_ip, const uint16_t destination_port,
     this->is_tcp = is_tcp;
 }
 
-Client::~Client() {}
+Client::~Client() {
+    stop();
+}
 
 Client_status Client::prepare() {
     if (is_tcp) {

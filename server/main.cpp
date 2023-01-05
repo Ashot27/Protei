@@ -10,10 +10,8 @@ int main(int argc, char* argv[]) {
         server.run();
     } else {
         cerr << "The server has an issue: " << _status << endl;
-        server.stop();
         return 1;
     }
 
-    server.stop();
     return 0;
 }

@@ -27,13 +27,15 @@ class Client {
     Client_status prepare();
     void run();
     bool is_status_ok();
-    void stop();
     void tcp_connect_hndl();
     void send_request_to_tcp_server(string message);
     string resv_response_from_tcp_server();
     void udp_connect_hndl();
     void send_request_to_udp_server(string message);
     string resv_response_from_udp_server();
+
+   private:
+    void stop();
 
    private:
     struct sockaddr_in destination_addr;

@@ -10,10 +10,7 @@ int main(int argc, char* argv[]) {
         client.run();
     } else {
         cerr << "The client has an issue: " << _status << endl;
-        client.stop();
         return 1;
     }
-
-    client.stop();
     return 0;
 }

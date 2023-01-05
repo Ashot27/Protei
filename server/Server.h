@@ -21,13 +21,13 @@ using std::string;
 class Server {
    private:
     Server(const char* ip, const uint16_t port);
+    void stop();
 
    public:
     ~Server();
     static Server& get_instance(const char* ip, const uint32_t port);
     Server_status prepare();
     void run();
-    void stop();
     void tcp_connect_hndl();
     string resv_request_from_tcp_client(const int client_socket);
     void send_response_to_tcp_client(const int client_socket, string data);

@@ -11,8 +11,6 @@ class Connection_test : public ::testing::Test {
     void SetUp() override {}
 
     void TearDown() override {}
-
-   private:
 };
 
 #define IP "127.0.0.1"
@@ -22,14 +20,12 @@ TEST(Connection_test, udp_client_prepare) {
     Client client(IP, PORT, false);
     Client_status _status = client.prepare();
     EXPECT_TRUE(client.is_status_ok());
-    client.stop();
 }
 
 TEST(Connection_test, tcp_client_prepare_without_server) {
     Client client(IP, PORT, true);
     Client_status _status = client.prepare();
     EXPECT_FALSE(client.is_status_ok());
-    client.stop();
 }
 
 TEST(Connection_test, tcp_client_prepare_with_server) {
@@ -39,6 +35,4 @@ TEST(Connection_test, tcp_client_prepare_with_server) {
     Client client(IP, PORT, true);
     Client_status c_status = client.prepare();
     EXPECT_TRUE(client.is_status_ok());
-    client.stop();
-    server.stop();
 }

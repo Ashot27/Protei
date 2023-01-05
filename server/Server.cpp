@@ -8,8 +8,7 @@ Server::Server(const char* ip, const uint16_t port) {
 }
 
 Server::~Server() {
-    if (_status == Server_status::up)
-        stop();
+    stop();
 }
 
 Server& Server::get_instance(const char* ip, const uint32_t port) {
@@ -172,10 +171,10 @@ void Server::send_response_to_udp_client(const struct sockaddr_in& client_addr,
 
 void Server::stop() {
     _status = Server_status::down;
-    if (close(s_socket_tcp) < 0) {
+    if (s_socket_tcp && close(s_socket_tcp) < 0) {
         cout << "Failed to close TCP socket: " << strerror(errno) << endl;
     }
-    if (close(s_socket_udp) < 0) {
+    if (s_socket_udp && close(s_socket_udp) < 0) {
         cout << "Failed to close UDP socket: " << strerror(errno) << endl;
     }
 }
