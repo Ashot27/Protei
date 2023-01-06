@@ -3,7 +3,6 @@
 Server::Server(const char* ip, const uint16_t port) {
     addr.sin_family = AF_INET;  // IPv4
     addr.sin_port = htons(port);
-    // htos convert 16-bit quantities between network byte order and host byte order.
     addr.sin_addr.s_addr = inet_addr(ip);
 }
 
@@ -89,7 +88,7 @@ void Server::run() {
 
     while (_status == Server_status::up) {
 
-        // set listenfd and udpfd in readset
+        // set s_socket_tcp and s_socket_udp in readset
         FD_SET(s_socket_tcp, &fd_read);
         FD_SET(s_socket_udp, &fd_read);
 
@@ -111,62 +110,91 @@ void Server::tcp_connect_hndl() {
     int client_socket =
         accept(s_socket_tcp, (struct sockaddr*)&client_addr, &addr_len);
     if (client_socket >= 0 && _status == Server_status::up) {
-        cout << "New connection!" << endl;
-        auto data = resv_request_from_tcp_client(client_socket);
-        send_response_to_tcp_client(client_socket, data);
+        cout << "New connection! " << inet_ntoa(client_addr.sin_addr) << ":"
+             << htons(client_addr.sin_port) << endl;
+        while (1) {
+            string result;
+            if (resv_request_from_tcp_client(client_socket, result) > 0) {
+                cout << "Message lenght: " << result.length() << endl;
+                cout << "the message: " << result << endl;
+                send_response_to_tcp_client(client_socket, result);
+            } else {
+                break;
+            }
+        }
     }
 }
 
-string Server::resv_request_from_tcp_client(const int client_socket) {
-    int resv_bytes_count = 0;
-    char buffer[BUFFER_SIZE] = {0};
-    if ((resv_bytes_count = recv(client_socket, buffer, BUFFER_SIZE, 0)) < 0) {
-        return "";
-    }
-    cout << "Reseive " << resv_bytes_count << " bytes from client." << endl;
-    return string(buffer, resv_bytes_count);
+int Server::resv_request_from_tcp_client(const int client_socket,
+                                         string& result) {
+    int resv_bytes_count =
+        0;  // the number of bytes received from a single message
+    int total_bytes_count = 0;
+    char buffer[BUFFER_SIZE + 1] = {0};
+    do {
+        resv_bytes_count = recv(client_socket, buffer, BUFFER_SIZE, 0);
+        if (resv_bytes_count < 0) {
+            cout << "The connection with TCP client was closed" << endl;
+            return 0;  // ignore the whole message
+        }
+        total_bytes_count += resv_bytes_count;
+        result += buffer;
+    } while (resv_bytes_count == BUFFER_SIZE);
+    return total_bytes_count;
 }
 
-void Server::send_response_to_tcp_client(const int client_socket, string data) {
-    size_t length = data.length();
-    char* c_message = new char[length + 1];
-    strcpy(c_message, data.c_str());
-
-    send(client_socket, c_message, length, 0);
+void Server::send_response_to_tcp_client(const int client_socket,
+                                         const string& message) {
+    size_t length = message.length() + 1;  // +1 for null terminator
+    send(client_socket, message.c_str(), length + 1, 0);
     cout << "Send " << length << " bytes to client." << endl;
-    delete[] c_message;
 }
 
 void Server::udp_connect_hndl() {
     struct sockaddr_in client_addr;
-    auto data = resv_request_from_udp_client(client_addr);
-    send_response_to_udp_client(client_addr, data);
+    string result;
+    if (resv_request_from_udp_client(client_addr, result) > 0) {
+        cout << "Message lenght: " << result.length() << endl;
+        cout << "the message: " << result << endl;
+        send_response_to_udp_client(client_addr, result);
+    }
 }
 
-string Server::resv_request_from_udp_client(
-    const struct sockaddr_in& client_addr) {
+int Server::resv_request_from_udp_client(const struct sockaddr_in& client_addr,
+                                         string& result) {
     socklen_t addr_len = sizeof(sockaddr_in);
-    int resv_bytes_count = 0;
-    char buffer[BUFFER_SIZE] = {0};
-    if ((resv_bytes_count =
-             recvfrom(s_socket_udp, buffer, BUFFER_SIZE, 0,
-                      (struct sockaddr*)&client_addr, &addr_len)) < 0) {
-        return "";
-    }
-    cout << "Reseive " << resv_bytes_count << " bytes from client." << endl;
-    return string(buffer, resv_bytes_count);
+    int resv_bytes_count =
+        0;  // the number of bytes received from a single message
+    int total_bytes_count = 0;
+    char buffer[BUFFER_SIZE + 1] = {0};
+
+    do {
+        resv_bytes_count = recvfrom(s_socket_udp, buffer, BUFFER_SIZE, 0,
+                                    (struct sockaddr*)&client_addr, &addr_len);
+        if (resv_bytes_count < 0) {
+            return 0;
+        }
+        total_bytes_count += resv_bytes_count;
+        result += buffer;
+    } while (resv_bytes_count == BUFFER_SIZE);
+    cout << "New message from! " << inet_ntoa(client_addr.sin_addr) << ":"
+         << htons(client_addr.sin_port) << endl;
+    cout << "Reseived " << resv_bytes_count << " bytes from client." << endl;
+    return total_bytes_count;
 }
 
 void Server::send_response_to_udp_client(const struct sockaddr_in& client_addr,
-                                         string data) {
-    size_t length = data.length();
-    char* c_message = new char[length + 1];
-    strcpy(c_message, data.c_str());
-
-    sendto(s_socket_udp, c_message, length, 0, (struct sockaddr*)&client_addr,
-           sizeof(sockaddr_in));
-    cout << "Send " << length << " bytes to client." << endl;
-    delete[] c_message;
+                                         string message) {
+    string tmp = "";
+    size_t length = 0;
+    //we separete the message by size if it's bigger than reading buffer size
+    for (size_t i = 0; i < message.length(); i += BUFFER_SIZE) {
+        tmp = message.substr(i, BUFFER_SIZE);
+        length = tmp.length() + 1;  // +1 for null terminator
+        sendto(s_socket_udp, tmp.c_str(), length, 0,
+               (struct sockaddr*)&client_addr, sizeof(sockaddr_in));
+    }
+    cout << "Send " << message.length() << " bytes to server." << endl;
 }
 
 void Server::stop() {

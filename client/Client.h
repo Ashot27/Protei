@@ -29,10 +29,10 @@ class Client {
     bool is_status_ok();
     void tcp_connect_hndl();
     void send_request_to_tcp_server(string message);
-    string resv_response_from_tcp_server();
+    void resv_response_from_tcp_server(string& result);
     void udp_connect_hndl();
     void send_request_to_udp_server(string message);
-    string resv_response_from_udp_server();
+    void resv_response_from_udp_server(string& result);
 
    private:
     void stop();

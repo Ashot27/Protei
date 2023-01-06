@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../String_parser.h"
 #include "Server_status.h"
 
 #include <arpa/inet.h>   // inet_addr
@@ -29,12 +30,14 @@ class Server {
     Server_status prepare();
     void run();
     void tcp_connect_hndl();
-    string resv_request_from_tcp_client(const int client_socket);
-    void send_response_to_tcp_client(const int client_socket, string data);
+    int resv_request_from_tcp_client(const int client_socket, string& result);
+    void send_response_to_tcp_client(const int client_socket,
+                                     const string& message);
     void udp_connect_hndl();
-    string resv_request_from_udp_client(const struct sockaddr_in& client_addr);
+    int resv_request_from_udp_client(const struct sockaddr_in& client_addr,
+                                     string& result);
     void send_response_to_udp_client(const struct sockaddr_in& client_addr,
-                                     string data);
+                                     string message);
 
    private:
     Server_status _status;
