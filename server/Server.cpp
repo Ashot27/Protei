@@ -116,7 +116,8 @@ void Server::tcp_connect_hndl() {
             string result;
             if (resv_request_from_tcp_client(client_socket, result) > 0) {
                 cout << "The message from the client: " << result << endl;
-                send_response_to_tcp_client(client_socket, result);
+                string reply_message = make_correct_response(result);
+                send_response_to_tcp_client(client_socket, reply_message);
             } else {
                 cout << "The connection with TCP client "
                      << inet_ntoa(client_addr.sin_addr) << ":"
@@ -158,7 +159,8 @@ void Server::udp_connect_hndl() {
         cout << "New message from: " << inet_ntoa(client_addr.sin_addr) << ":"
              << htons(client_addr.sin_port) << endl
              << result << endl;
-        send_response_to_udp_client(client_addr, result);
+        string reply_message = make_correct_response(result);
+        send_response_to_udp_client(client_addr, reply_message);
     }
 }
 
