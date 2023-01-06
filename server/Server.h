@@ -5,10 +5,12 @@
 
 #include <arpa/inet.h>   // inet_addr
 #include <netinet/in.h>  // sockaddr_in
+#include <signal.h>
 #include <sys/socket.h>
 #include <unistd.h>  // close
 #include <cstring>   //strerror
 #include <iostream>
+#include <list>
 #include <string>
 
 using std::cerr;
@@ -47,4 +49,5 @@ class Server {
     fd_set fd_read;
     fd_set fd_write;
     sockaddr_in addr;
+    std::list<pid_t> pids;
 };
