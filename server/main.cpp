@@ -2,7 +2,16 @@
 
 int main(int argc, char* argv[]) {
 
-    Server server = Server::get_instance("127.0.0.1", 8080);
+    IPv4_addr addr = IPv4_addr();
+    try {
+        parser(argc, argv, &addr);
+    } catch (ParserException) {
+        return 1;
+    }
+    cout << "Deploing the server on:    " << addr.get_ip() << ":"
+         << addr.get_port() << endl;
+
+    Server server = Server::get_instance(addr.get_ip(), addr.get_port());
     Server_status _status;
     if ((_status = server.prepare()) == Server_status::up) {
         cout << "The server is running" << endl;

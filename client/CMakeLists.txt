@@ -7,9 +7,11 @@ set(HEADER_FILES
     "main.h" 
     "Client.h" 
     "Client_status.h" 
+    "../key_parser.h"
 )
 
 add_executable (Client 
     "main.cpp" 
     "Client.cpp" 
+    "../key_parser.cpp"
 )
