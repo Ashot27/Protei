@@ -115,10 +115,13 @@ void Server::tcp_connect_hndl() {
         while (1) {
             string result;
             if (resv_request_from_tcp_client(client_socket, result) > 0) {
-                cout << "Message lenght: " << result.length() << endl;
-                cout << "the message: " << result << endl;
+                cout << "The message from the client: " << result << endl;
                 send_response_to_tcp_client(client_socket, result);
             } else {
+                cout << "The connection with TCP client "
+                     << inet_ntoa(client_addr.sin_addr) << ":"
+                     << htons(client_addr.sin_port) << " was closed" << endl;
+
                 break;
             }
         }
@@ -134,7 +137,6 @@ int Server::resv_request_from_tcp_client(const int client_socket,
     do {
         resv_bytes_count = recv(client_socket, buffer, BUFFER_SIZE, 0);
         if (resv_bytes_count < 0) {
-            cout << "The connection with TCP client was closed" << endl;
             return 0;  // ignore the whole message
         }
         total_bytes_count += resv_bytes_count;
@@ -147,15 +149,15 @@ void Server::send_response_to_tcp_client(const int client_socket,
                                          const string& message) {
     size_t length = message.length() + 1;  // +1 for null terminator
     send(client_socket, message.c_str(), length + 1, 0);
-    cout << "Send " << length << " bytes to client." << endl;
 }
 
 void Server::udp_connect_hndl() {
     struct sockaddr_in client_addr;
     string result;
     if (resv_request_from_udp_client(client_addr, result) > 0) {
-        cout << "Message lenght: " << result.length() << endl;
-        cout << "the message: " << result << endl;
+        cout << "New message from: " << inet_ntoa(client_addr.sin_addr) << ":"
+             << htons(client_addr.sin_port) << endl
+             << result << endl;
         send_response_to_udp_client(client_addr, result);
     }
 }
@@ -177,9 +179,6 @@ int Server::resv_request_from_udp_client(const struct sockaddr_in& client_addr,
         total_bytes_count += resv_bytes_count;
         result += buffer;
     } while (resv_bytes_count == BUFFER_SIZE);
-    cout << "New message from! " << inet_ntoa(client_addr.sin_addr) << ":"
-         << htons(client_addr.sin_port) << endl;
-    cout << "Reseived " << resv_bytes_count << " bytes from client." << endl;
     return total_bytes_count;
 }
 
@@ -194,7 +193,6 @@ void Server::send_response_to_udp_client(const struct sockaddr_in& client_addr,
         sendto(s_socket_udp, tmp.c_str(), length, 0,
                (struct sockaddr*)&client_addr, sizeof(sockaddr_in));
     }
-    cout << "Send " << message.length() << " bytes to server." << endl;
 }
 
 void Server::stop() {
