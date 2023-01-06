@@ -27,10 +27,10 @@ class Client {
     Client_status prepare();
     void run();
     bool is_status_ok();
-    void tcp_connect_hndl();
+    void tcp_connect_hndl(const string& message);
     void send_request_to_tcp_server(string message);
     void resv_response_from_tcp_server(string& result);
-    void udp_connect_hndl();
+    void udp_connect_hndl(const string& message);
     void send_request_to_udp_server(string message);
     void resv_response_from_udp_server(string& result);
 
