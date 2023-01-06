@@ -45,9 +45,9 @@ Client_status Client::prepare() {
 
 void Client::run() {
     string message;
-    cout << "Write \":q!\" to exit or use Cntr+C" << endl;
+    cout << "Write \":q!\" to exit or use Ctrl+C" << endl;
     while (is_status_ok()) {
-        cin >> message;
+        getline(cin, message);
         if (message == ":q!") {
             break;
         }
@@ -70,7 +70,7 @@ void Client::tcp_connect_hndl(const string& message) {
     send_request_to_tcp_server(message);
     string resv_message;
     resv_response_from_tcp_server(resv_message);
-    cout << "The responce from the server:  " << resv_message << endl;
+    cout << "The response from the server:" << endl << resv_message << endl;
 };
 
 void Client::send_request_to_tcp_server(string message) {
@@ -97,7 +97,7 @@ void Client::udp_connect_hndl(const string& message) {
     send_request_to_udp_server(message);
     string resv_message;
     resv_response_from_udp_server(resv_message);
-    cout << "The responce from the server:  " << resv_message << endl;
+    cout << "The response from the server:" << endl << resv_message << endl;
 };
 
 void Client::send_request_to_udp_server(string message) {
