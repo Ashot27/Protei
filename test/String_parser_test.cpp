@@ -28,9 +28,51 @@ TEST(Parser_test, make_response_only_numbers) {
     EXPECT_TRUE(const_ref_str == result);
 }
 
+TEST(Parser_test, make_response_negative_numbers) {
+    const string const_str = "-1";
+    const string const_ref_str = "-1\n-1";
+    string result = make_correct_response(const_str);
+    EXPECT_TRUE(const_ref_str == result);
+}
+
 TEST(Parser_test, make_response_only_numbers_2) {
     const string const_str = "1 2";
     const string const_ref_str = "1 2\n3";
+    string result = make_correct_response(const_str);
+    EXPECT_TRUE(const_ref_str == result);
+}
+
+TEST(Parser_test, make_response_negative_numbers_2) {
+    const string const_str = "-1-2";
+    const string const_ref_str = "-2 -1\n-3";
+    string result = make_correct_response(const_str);
+    EXPECT_TRUE(const_ref_str == result);
+}
+
+TEST(Parser_test, make_response_negative_numbers_3) {
+    const string const_str = "0-1-2";
+    const string const_ref_str = "-2 -1 0\n-3";
+    string result = make_correct_response(const_str);
+    EXPECT_TRUE(const_ref_str == result);
+}
+
+TEST(Parser_test, make_response_negative_zero) {
+    const string const_str = "-0";
+    const string const_ref_str = "0\n0";
+    string result = make_correct_response(const_str);
+    EXPECT_TRUE(const_ref_str == result);
+}
+
+TEST(Parser_test, make_response_positive_zero) {
+    const string const_str = "+0";
+    const string const_ref_str = "0\n0";
+    string result = make_correct_response(const_str);
+    EXPECT_TRUE(const_ref_str == result);
+}
+
+TEST(Parser_test, make_response_space_after_minus) {
+    const string const_str = "+0-1 - 1";
+    const string const_ref_str = "-1 0 1\n0";
     string result = make_correct_response(const_str);
     EXPECT_TRUE(const_ref_str == result);
 }
