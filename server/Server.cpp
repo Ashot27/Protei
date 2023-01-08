@@ -79,7 +79,6 @@ Server_status Server::prepare() {
     }
 
     FD_ZERO(&fd_read);  // clear the descriptor
-    max_fd = (s_socket_tcp > s_socket_udp ? s_socket_tcp : s_socket_udp) + 1;
 
     return _status = Server_status::up;
 }
@@ -92,50 +91,79 @@ void Server::run() {
         FD_SET(s_socket_tcp, &fd_read);
         FD_SET(s_socket_udp, &fd_read);
 
-        // select the ready descriptor
-        int ready = select(max_fd, &fd_read, NULL, NULL, NULL);
+        max_fd = (s_socket_tcp > s_socket_udp ? s_socket_tcp : s_socket_udp);
+        for (const auto& client : tcp_connections) {
+            if (client.socket > 0)
+                FD_SET(client.socket, &fd_read);
 
-        if (FD_ISSET(s_socket_tcp, &fd_read)) {  // if tcp socket is readable
-            tcp_connect_hndl();
+            if (client.socket > max_fd)
+                max_fd = client.socket;
         }
+
+        // select the ready descriptor
+        int ready = select(max_fd + 1, &fd_read, NULL, NULL, NULL);
+        if (ready < 0) {
+            cerr << "Failed to select socket: " << strerror(errno) << endl;
+            FD_ZERO(&fd_read);  // clear the descriptor
+            continue;
+        }
+
         if (FD_ISSET(s_socket_udp, &fd_read)) {  // if udp socket is readable
             udp_connect_hndl();
+        }
+
+        if (FD_ISSET(s_socket_tcp,
+                     &fd_read)) {  // if tcp socket gets a new connection
+            tcp_new_connect_hndl();
+        }
+        for (size_t i = 0, n = tcp_connections.size(); i < n;) {
+            if (FD_ISSET(tcp_connections[i].socket,
+                         &fd_read)) {  // if tcp socket is readable
+                if (!tcp_connect_hndl(tcp_connections[i])) {
+                    //if the connection was closed;
+                    tcp_connections.erase(tcp_connections.begin() + i);
+                    n--;
+                    continue;
+                }
+            };
+            i++;
         }
     }
 };
 
-void Server::tcp_connect_hndl() {
+void Server::tcp_new_connect_hndl() {
     struct sockaddr_in client_addr;
     socklen_t addr_len = sizeof(sockaddr_in);
     int client_socket =
         accept(s_socket_tcp, (struct sockaddr*)&client_addr, &addr_len);
-    pid_t child_pid = 0;
-    if ((child_pid = fork()) == 0) {
-        close(s_socket_tcp);
-        if (client_socket >= 0 && _status == Server_status::up) {
-            cout << "New connection! " << inet_ntoa(client_addr.sin_addr) << ":"
-                 << htons(client_addr.sin_port) << endl;
-            while (1) {
-                string result;
-                if (resv_request_from_tcp_client(client_socket, result) > 0) {
-                    cout << "The message from the client: " << result << endl;
-                    string reply_message = make_correct_response(result);
-                    send_response_to_tcp_client(client_socket, reply_message);
-                } else {
-                    cout << "The connection with TCP client "
-                         << inet_ntoa(client_addr.sin_addr) << ":"
-                         << htons(client_addr.sin_port) << " was closed"
-                         << endl;
+    cout << "New connection! " << inet_ntoa(client_addr.sin_addr) << ":"
+         << htons(client_addr.sin_port) << endl;
 
-                    break;
-                }
-            }
+    tcp_connections.push_back({client_socket, client_addr});
+}
+
+bool Server::tcp_connect_hndl(const client& client) {
+    //return false if the connection was closed;
+    if (client.socket >= 0 && _status == Server_status::up) {
+        string result;
+        if (resv_request_from_tcp_client(client.socket, result) > 0) {
+            cout << "The message from TCP client "
+                 << inet_ntoa(client.addr.sin_addr) << ":"
+                 << htons(client.addr.sin_port) << " :  " << result << endl;
+            string reply_message = make_correct_response(result);
+            send_response_to_tcp_client(client.socket, reply_message);
+            return true;
+
+        } else {
+            cout << "The connection with TCP client "
+                 << inet_ntoa(client.addr.sin_addr) << ":"
+                 << htons(client.addr.sin_port) << " was closed" << endl;
+
+            close(client.socket);
+            return false;
         }
-        close(client_socket);
-        exit(0);
     }
-    pids.push_back(child_pid);
-    close(client_socket);
+    return false;
 }
 
 int Server::resv_request_from_tcp_client(const int client_socket,
@@ -165,9 +193,9 @@ void Server::udp_connect_hndl() {
     struct sockaddr_in client_addr;
     string result;
     if (resv_request_from_udp_client(client_addr, result) > 0) {
-        cout << "New message from: " << inet_ntoa(client_addr.sin_addr) << ":"
-             << htons(client_addr.sin_port) << endl
-             << result << endl;
+        cout << "New message from UDP client "
+             << inet_ntoa(client_addr.sin_addr) << ":"
+             << htons(client_addr.sin_port) << " :  " << result << endl;
         string reply_message = make_correct_response(result);
         send_response_to_udp_client(client_addr, reply_message);
     }
@@ -208,14 +236,16 @@ void Server::send_response_to_udp_client(const struct sockaddr_in& client_addr,
 
 void Server::stop() {
     _status = Server_status::down;
+    for (const auto& client : tcp_connections) {
+        if (client.socket && close(client.socket) < 0) {
+            cout << "Failed to close TCP client socket: " << strerror(errno)
+                 << endl;
+        }
+    }
     if (s_socket_tcp && close(s_socket_tcp) < 0) {
         cout << "Failed to close TCP socket: " << strerror(errno) << endl;
     }
     if (s_socket_udp && close(s_socket_udp) < 0) {
         cout << "Failed to close UDP socket: " << strerror(errno) << endl;
-    }
-    for (const auto& pid : pids) {
-        cout << "Kill child process:    " << pid << endl;
-        kill(pid, SIGKILL);
     }
 }

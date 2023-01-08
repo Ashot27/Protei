@@ -5,12 +5,10 @@
 
 #include <arpa/inet.h>   // inet_addr
 #include <netinet/in.h>  // sockaddr_in
-#include <signal.h>
 #include <sys/socket.h>
 #include <unistd.h>  // close
 #include <cstring>   //strerror
 #include <iostream>
-#include <list>
 #include <string>
 
 using std::cerr;
@@ -20,6 +18,11 @@ using std::strerror;
 using std::string;
 
 #define BUFFER_SIZE 1024
+
+struct client {
+    int socket;
+    sockaddr_in addr;
+};
 
 class Server {
    private:
@@ -31,7 +34,8 @@ class Server {
     static Server& get_instance(const char* ip, const uint32_t port);
     Server_status prepare();
     void run();
-    void tcp_connect_hndl();
+    void tcp_new_connect_hndl();
+    bool tcp_connect_hndl(const client& client);
     int resv_request_from_tcp_client(const int client_socket, string& result);
     void send_response_to_tcp_client(const int client_socket,
                                      const string& message);
@@ -47,7 +51,6 @@ class Server {
     int s_socket_udp;
     int max_fd;
     fd_set fd_read;
-    fd_set fd_write;
     sockaddr_in addr;
-    std::list<pid_t> pids;
+    std::vector<client> tcp_connections;
 };
