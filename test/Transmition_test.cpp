@@ -19,6 +19,7 @@ class Transmition_test : public ::testing::Test {
             server.run();
             exit(0);
         }
+        sleep(1);  // to make sure that the server managed to run
     }
 
     ~Transmition_test() override { kill(server_pid, SIGTERM); }

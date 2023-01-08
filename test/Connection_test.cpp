@@ -4,16 +4,19 @@
 
 class Connection_test : public ::testing::Test {
    protected:
-    Connection_test() {
-        std::cout.rdbuf(nullptr);  // hide cout
-        std::cerr.rdbuf(nullptr);  // hide cerr
-    }
+    Connection_test() {}
 
     ~Connection_test() override {}
 
-    void SetUp() override {}
+    void SetUp() override {
+        cout.rdbuf(nullptr);  // hide cout
+        cerr.rdbuf(nullptr);  // hide cerr
+    }
 
-    void TearDown() override {}
+    void TearDown() override {
+        cout.clear();
+        cerr.clear();
+    }
 };
 
 #define IP "127.0.0.1"
