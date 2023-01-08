@@ -24,7 +24,7 @@ Client_status Client::prepare() {
                     sizeof(destination_addr)) < 0) {
             cerr << "Failed to connect to the server "
                  << inet_ntoa(destination_addr.sin_addr) << ":"
-                 << htons(destination_addr.sin_port) << " :" << strerror(errno)
+                 << htons(destination_addr.sin_port) << " : " << strerror(errno)
                  << endl;
             close(c_socket);
             return _status = Client_status::err_socket_connection;
@@ -131,7 +131,7 @@ void Client::resv_response_from_udp_server(string& result) {
 
 void Client::stop() {
     _status = Client_status::disconnected;
-    if (close(c_socket) < 0) {
+    if (c_socket && close(c_socket) < 0) {
         cout << "Failed to close socket: " << strerror(errno) << endl;
     }
 };
