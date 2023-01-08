@@ -2,7 +2,7 @@
 ## NAME:  
   TCP/UDP server   
 ## DESCRIPTION:  
-  The program deploys a TCP and UDP server, waits for a connection from a TCP client or a message from an UDP client. After catching the message, the server finds all the numbers, sorts them and sends them to the client with their sum. If there is no number the server sends the captured message back to the client.
+  The program deploys a TCP and UDP server, waits for a connection from a TCP client or a message from an UDP client. After catching the message, the server finds all the __integer__ numbers, sorts them and sends them to the client with their sum. If there is no number the server sends the captured message back to the client.
 ## OPTIONS:  
 * __-ip/-i__ \<ip\>  
 	specify the server IPv4 address. Localhost is used by default.    
