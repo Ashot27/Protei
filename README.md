@@ -2,12 +2,12 @@
 ## NAME:  
   TCP/UDP server   
 ## DESCRIPTION:  
-  The program deploys a TCP and UDP server, waits for a connection from a TCP client or a message from a UDP client. After catching the message, the server finds all the numbers, sorts them and sends them to the client with their sum. If there is no number the server sends the captured message back to the client.
+  The program deploys a TCP and UDP server, waits for a connection from a TCP client or a message from an UDP client. After catching the message, the server finds all the numbers, sorts them and sends them to the client with their sum. If there is no number the server sends the captured message back to the client.
 ## OPTIONS:  
-* __-ip/-i__  
-	<ip> specify the server IPv4 address. Localhost is used by default.    
-* __-port/-p__  
-	<port> specify the server port. Port 8080 is used by default.  
+* __-ip/-i__ \<ip\>  
+	specify the server IPv4 address. Localhost is used by default.    
+* __-port/-p__ \<port\>  
+	specify the server port. Port 8080 is used by default.  
 * __-udp/-u__  
 	ignores for the server 
 * __-help/-h__    
@@ -18,12 +18,12 @@
 ## DESCRIPTION:  
   The program deploys a TCP or UDP client, connects to the server and waits for a message in standard input. This message will be sent to the server. The client waits for a response from the server and then allows the user to send another message.  
 ## OPTIONS:  
-* __-ip/-i__
-	<ip> specify the remote server IPv4 address. Localhost is used by default.    
-* __-port/-p__  
-	<port> specify the remote server port. Port 8080 is used by default.  
-* __-udp/-u__  
-	used to specify the UDP protocol. TCP is used by default  
+* __-ip/-i__ \<ip\>  
+		specify the remote server IPv4 address. Localhost is used by default.    
+* __-port/-p__ \<port\>  
+		specify the remote server port. Port 8080 is used by default.  
+* __-udp/-u__   
+		used to specify the UDP protocol. TCP is used by default  
 * __-help/-h__    
 
 
