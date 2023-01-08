@@ -51,13 +51,20 @@ void Client::run() {
         if (message == ":q!") {
             break;
         }
-        if (is_tcp) {
-            tcp_connect_hndl(message);
-        } else {
-            udp_connect_hndl(message);
-        }
+        string result;
+        data_transmission(message, result);
+        cout << "The response from the server:" << endl << result << endl;
     }
 };
+
+void Client::data_transmission(const string& message, string& result) {
+    // It has been allocated to a separate function for testing
+    if (is_tcp) {
+        tcp_connect_hndl(message, result);
+    } else {
+        udp_connect_hndl(message, result);
+    }
+}
 
 bool Client::is_status_ok() {
     if (is_tcp) {
@@ -66,14 +73,12 @@ bool Client::is_status_ok() {
     return _status == Client_status::up;
 }
 
-void Client::tcp_connect_hndl(const string& message) {
+void Client::tcp_connect_hndl(const string& message, string& result) {
     send_request_to_tcp_server(message);
-    string resv_message;
-    resv_response_from_tcp_server(resv_message);
-    cout << "The response from the server:" << endl << resv_message << endl;
+    resv_response_from_tcp_server(result);
 };
 
-void Client::send_request_to_tcp_server(string message) {
+void Client::send_request_to_tcp_server(const string& message) {
     size_t length = message.length() + 1;  // +1 for null terminator
     send(c_socket, message.c_str(), length, 0);
 };
@@ -93,14 +98,12 @@ void Client::resv_response_from_tcp_server(string& result) {
     } while (resv_bytes_count == BUFFER_SIZE);
 };
 
-void Client::udp_connect_hndl(const string& message) {
+void Client::udp_connect_hndl(const string& message, string& result) {
     send_request_to_udp_server(message);
-    string resv_message;
-    resv_response_from_udp_server(resv_message);
-    cout << "The response from the server:" << endl << resv_message << endl;
+    resv_response_from_udp_server(result);
 };
 
-void Client::send_request_to_udp_server(string message) {
+void Client::send_request_to_udp_server(const string& message) {
     string tmp = "";
     size_t length = 0;
     //we separete the message by size if it's bigger than reading buffer size

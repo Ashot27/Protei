@@ -26,12 +26,13 @@ class Client {
 
     Client_status prepare();
     void run();
+    void data_transmission(const string& message, string& result);
     bool is_status_ok();
-    void tcp_connect_hndl(const string& message);
-    void send_request_to_tcp_server(string message);
+    void tcp_connect_hndl(const string& message, string& result);
+    void send_request_to_tcp_server(const string& message);
     void resv_response_from_tcp_server(string& result);
-    void udp_connect_hndl(const string& message);
-    void send_request_to_udp_server(string message);
+    void udp_connect_hndl(const string& message, string& result);
+    void send_request_to_udp_server(const string& message);
     void resv_response_from_udp_server(string& result);
 
    private:

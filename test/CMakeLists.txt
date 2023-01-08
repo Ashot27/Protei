@@ -12,10 +12,10 @@ add_executable (Test
     "main.cpp" 
     "String_parser_test.cpp"
     "Connection_test.cpp"
+    "Transmition_test.cpp"
     "../server/Server.cpp"
     "../client/Client.cpp"
 )
-
 
 target_link_libraries(Test gtest)
 #add_definitions(-w) #hide warnings
